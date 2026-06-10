@@ -1,0 +1,20 @@
+__pycache__/
+*.pyc
+*.egg-info/
+
+# Run outputs
+artifacts/
+logs/
+
+# GenericAgent per-instance runtime dirs
+ga_temp/
+ga_memory/
+
+# Real claw configs (contain API keys) — only *.example files are tracked
+claw_configs/hermes/config.yaml
+claw_configs/nanobot/config.json
+claw_configs/zeroclaw/config.toml
+claw_configs/generic/mykey.py
+
+# Internal pre-release review notes (contain key fragments)
+RELEASE_REVIEW.md

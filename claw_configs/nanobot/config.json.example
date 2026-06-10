@@ -1,0 +1,22 @@
+{
+  "_comment": "NanoBot runtime config. Copy to config.json and fill in your API key. Mounted at /opt/nanobot-config inside the container. Model/provider live here (NanoBot has no --model CLI flag). To report cached_tokens via the host-side cache proxy, set api_base to http://host.docker.internal:18096/v1 and start proxies/dashscope_cache_proxy.py on port 18096.",
+  "providers": {
+    "dashscope": {
+      "api_key": "YOUR_DASHSCOPE_API_KEY",
+      "api_base": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": "qwen3.6-flash",
+      "provider": "dashscope",
+      "maxToolIterations": 300
+    }
+  },
+  "tools": {
+    "web": {
+      "enable": false
+    },
+    "restrictToWorkspace": false
+  }
+}

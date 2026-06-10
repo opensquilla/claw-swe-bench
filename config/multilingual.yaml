@@ -1,0 +1,8 @@
+dataset_name: "SWE-bench/SWE-bench_Multilingual"
+split: "test"
+timeout: 3600
+max_retries: 1
+eval_workers: 1
+# Inject a global gitignore so build artifacts (jars, target/, node_modules/)
+# don't pollute the collected patch on non-Python repos.
+setup_gitignore: true

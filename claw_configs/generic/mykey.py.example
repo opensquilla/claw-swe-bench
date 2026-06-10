@@ -1,0 +1,82 @@
+# GenericAgent provider config for SWE-bench adapter
+#
+# Order of variables determines --llm_no:
+#   --llm_no 0  →  config_glm51_openrouter
+#   --llm_no 1  →  config_dsv4flash_openrouter
+#   --llm_no 2  →  config_qwen36plus_dashscope
+#   --llm_no 3  →  config_opus47_openrouter (NativeClaude)
+#
+# API keys are read from environment so the file can be checked in. The
+# adapter's docker exec command forwards OPENROUTER_API_KEY, ANTHROPIC_API_KEY,
+# DASHSCOPE_API_KEY, etc. into the container.
+
+import os
+
+
+# ── 0. GLM-5.1 via OpenRouter (NativeOAISession) ──────────────────────────
+native_oai_config_glm51_openrouter = {
+    'name': 'glm-5.1-openrouter',
+    'apikey': os.environ.get('OPENROUTER_API_KEY', ''),
+    'apibase': 'https://openrouter.ai/api/v1',
+    'model': 'z-ai/glm-5.1',
+    'max_retries': 3,
+    'connect_timeout': 10,
+    'read_timeout': 180,
+}
+
+
+# ── 1. DeepSeek V4 Flash via OpenRouter (NativeOAISession) ─────────────────
+native_oai_config_dsv4flash_openrouter = {
+    'name': 'dsv4flash-openrouter',
+    'apikey': os.environ.get('OPENROUTER_API_KEY', ''),
+    'apibase': 'https://openrouter.ai/api/v1',
+    'model': 'deepseek/deepseek-v4-flash',
+    'max_retries': 3,
+    'connect_timeout': 10,
+    'read_timeout': 180,
+}
+
+
+# ── 2. Qwen3.6-Plus via DashScope (NativeOAISession) ───────────────────────
+native_oai_config_qwen36plus_dashscope = {
+    'name': 'qwen3.6-plus-dashscope',
+    'apikey': os.environ.get('DASHSCOPE_API_KEY', ''),
+    'apibase': 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+    'model': 'qwen3.6-plus',
+    'max_retries': 3,
+    'connect_timeout': 10,
+    'read_timeout': 180,
+}
+
+
+# ── 4. Qwen3.6-Flash via DashScope (NativeOAISession) ──────────────────────
+# Routed through dashscope_cache_proxy.py (port 18093) so the proxy can
+# inject `cache_control: ephemeral` on each request — DashScope only
+# returns `cached_tokens` when this marker is present.
+# Start the proxy first:
+#   python3 dashscope_cache_proxy.py 18093 logs/dashscope_proxy_usage.jsonl
+# Container must have --add-host host.docker.internal:host-gateway (already
+# set in workspace.py).
+native_oai_config_qwen36flash_dashscope = {
+    'name': 'qwen3.6-flash-dashscope',
+    'apikey': os.environ.get('DASHSCOPE_API_KEY', ''),
+    'apibase': 'http://host.docker.internal:18093/v1',
+    'model': 'qwen3.6-flash',
+    'max_retries': 3,
+    'connect_timeout': 10,
+    'read_timeout': 180,
+}
+
+
+# ── 3. Anthropic Opus 4.7 direct (NativeClaudeSession) ─────────────────────
+native_claude_config_opus47_anthropic = {
+    'name': 'opus-4.7-anthropic',
+    'apikey': os.environ.get('ANTHROPIC_API_KEY', ''),
+    'apibase': 'https://api.anthropic.com',
+    'model': 'claude-opus-4-7',
+    'thinking_type': 'adaptive',
+    'max_tokens': 32768,
+    'max_retries': 3,
+    'connect_timeout': 10,
+    'read_timeout': 180,
+}

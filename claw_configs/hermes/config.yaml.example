@@ -1,0 +1,53 @@
+# Hermes runtime config. Copy to config.yaml and fill in your API keys.
+# This directory is mounted at /opt/hermes-config inside the container
+# (HERMES_HOME), so Hermes reads this file directly.
+#
+# `model.default` is overridden by run_infer.py --model; `provider` must
+# match one of the custom_providers below (or a Hermes built-in).
+
+model:
+  default: "glm-5.1"
+  provider: "openrouter"
+
+custom_providers:
+  - name: "openrouter"
+    base_url: "https://openrouter.ai/api/v1"
+    api_key: "YOUR_OPENROUTER_API_KEY"
+    api_mode: "chat_completions"
+    context_length: 200000
+  - name: "deepseek"
+    base_url: "https://api.deepseek.com"
+    api_key: "YOUR_DEEPSEEK_API_KEY"
+    api_mode: "chat_completions"
+    context_length: 1000000
+  # DashScope, optionally routed through the host-side cache proxy
+  # (proxies/dashscope_cache_proxy.py) so cached_tokens are reported:
+  #   base_url: "http://host.docker.internal:18094/v1"
+  - name: "dashscope"
+    base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    api_key: "YOUR_DASHSCOPE_API_KEY"
+    api_mode: "chat_completions"
+    context_length: 262144
+  - name: "infini-ai"
+    base_url: "https://cloud.infini-ai.com/maas/v1"
+    api_key: "YOUR_INFINI_API_KEY"
+    api_mode: "chat_completions"
+    context_length: 200000
+
+agent:
+  max_turns: 300
+  reasoning_effort: "high"
+
+terminal:
+  backend: "local"
+  timeout: 180
+
+compression:
+  enabled: false
+
+approvals:
+  mode: "off"
+
+display:
+  show_reasoning: false
+  streaming: false

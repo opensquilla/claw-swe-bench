@@ -1,0 +1,6 @@
+dataset_name: "princeton-nlp/SWE-bench_Verified"
+split: "test"
+timeout: 3600
+max_retries: 1
+eval_workers: 1
+setup_gitignore: false

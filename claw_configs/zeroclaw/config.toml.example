@@ -1,0 +1,57 @@
+# ZeroClaw runtime config. Copy to config.toml and fill in your API key.
+# The adapter copies this file to /tmp/zeroclaw-workspace/config.toml inside
+# each container (post_container_start).
+#
+# The provider below points at the host-side tool-filtering proxy
+# (claw_configs/zeroclaw/tool_filter_proxy.py, port 18090), which strips
+# tools that would break the eval (network access etc.) and logs usage to
+# /tmp/proxy_usage.jsonl for cost accounting. Start it before running:
+#
+#   python3 claw_configs/zeroclaw/tool_filter_proxy.py <upstream_base_url> [port] [usage_log]
+#   # e.g. python3 claw_configs/zeroclaw/tool_filter_proxy.py \
+#   #   https://dashscope.aliyuncs.com/compatible-mode/v1 18090 /tmp/proxy_usage.jsonl
+#
+# To call a provider directly instead, replace the fallback URL with the
+# provider's base URL.
+
+schema_version = 2
+
+[autonomy]
+level = "full"
+allowed_commands = ["*"]
+forbidden_paths = []
+workspace_only = false
+block_high_risk_commands = false
+require_approval_for_medium_risk = false
+max_actions_per_hour = 99999
+max_cost_per_day_cents = 999999
+shell_timeout_secs = 180
+
+[security]
+[security.sandbox]
+enabled = false
+
+[agent]
+max_tool_iterations = 300
+max_context_tokens = 128000
+
+[agent.thinking]
+default-level = "xhigh"
+
+[runtime]
+reasoning-effort = "xhigh"
+
+[pacing]
+loop_detection_enabled = false
+
+[providers]
+fallback = "custom:http://host.docker.internal:18090"
+
+[providers.models."custom:http://host.docker.internal:18090"]
+api_key = "YOUR_API_KEY"
+model = "qwen3.6-flash"
+wire_api = "chat_completions"
+timeout_secs = 300
+
+[shell_tool]
+timeout_secs = 180
