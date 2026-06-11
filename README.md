@@ -7,8 +7,8 @@ collection, and evaluation across all of them — so the harness becomes a
 controlled variable and results are comparable harness-to-harness.
 
 This repository is the reference implementation for the technical report
-*Claw-SWE-Bench: A Benchmark for Evaluating OpenClaw-Style Agent Harnesses on
-Coding Tasks*. The full benchmark is 350 GitHub issue-resolution
+[Claw-SWE-Bench: A Benchmark for Evaluating OpenClaw-Style Agent Harnesses on
+Coding Tasks](https://arxiv.org/abs/2606.12344). The full benchmark is 350 GitHub issue-resolution
 instances across 8 languages (300 from SWE-bench Multilingual + 50 from
 SWE-bench Verified-Mini); the paper also defines an 80-instance **Lite** subset
 for low-cost iteration (see *Instance lists* in Notes).
