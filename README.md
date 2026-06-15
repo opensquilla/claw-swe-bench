@@ -13,6 +13,8 @@ instances across 8 languages (300 from SWE-bench Multilingual + 50 from
 SWE-bench Verified-Mini); the paper also defines an 80-instance **Lite** subset
 for low-cost iteration (see *Instance lists* in Notes).
 
+**Leaderboard:** [claw-swe-bench.github.io](https://claw-swe-bench.github.io/)
+
 Supported claws:
 
 | Claw | Runtime | How it gets into the container | Model selection |
