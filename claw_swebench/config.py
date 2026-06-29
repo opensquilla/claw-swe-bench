@@ -53,6 +53,7 @@ SWEBENCH_WORK_DIR = Path(os.environ.get("SWEBENCH_WORK_DIR", "/data"))
 # ---------------------------------------------------------------------------
 CLAW_DEFAULTS = {
     "openclaw": {"model": "openrouter/anthropic/claude-opus-4.6", "timeout": 3600, "max_turns": 300},
+    "opensquilla": {"model": "G12",          "timeout": 3600, "max_turns": 12},
     "hermes":   {"model": "glm-5.1",        "timeout": 3600, "max_turns": 300},
     "nanobot":  {"model": "qwen3.6-flash",  "timeout": 3600, "max_turns": 300},
     "zeroclaw": {"model": "qwen3.6-flash",  "timeout": 3600, "max_turns": 300},
@@ -68,6 +69,9 @@ API_KEY_ENV_VARS = (
     "OPENAI_API_KEY",
     "DASHSCOPE_API_KEY",
     "INFINI_API_KEY",
+    "GEMINI_API_KEY",
+    "MOONSHOT_API_KEY",
+    "ZAI_API_KEY",
 )
 
 DEFAULT_AGENT_TIMEOUT = 3600  # seconds
@@ -94,6 +98,13 @@ OPENCLAW_STATE_DIR = Path(os.environ.get("OPENCLAW_STATE_DIR", str(Path.home() /
 # Hermes (Python venv)
 HERMES_ENV_PATH = os.environ.get("HERMES_ENV_PATH", "/opt/hermes-env")
 HERMES_SITE_PACKAGES = f"{HERMES_ENV_PATH}/lib/python3.12/site-packages"
+
+# OpenSquilla (Python venv)
+OPENSQUILLA_ENV_PATH = os.environ.get("OPENSQUILLA_ENV_PATH", "/opt/opensquilla-env")
+OPENSQUILLA_SITE_PACKAGES = os.environ.get(
+    "OPENSQUILLA_SITE_PACKAGES",
+    f"{OPENSQUILLA_ENV_PATH}/lib/python3.12/site-packages",
+)
 
 # NanoBot (Python venv)
 NANOBOT_ENV_PATH = os.environ.get("NANOBOT_ENV_PATH", "/opt/nanobot-env")

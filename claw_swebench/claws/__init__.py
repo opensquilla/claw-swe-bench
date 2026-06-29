@@ -10,10 +10,12 @@ from claw_swebench.claws.generic import GenericAgentAdapter
 from claw_swebench.claws.hermes import HermesAdapter
 from claw_swebench.claws.nanobot import NanoBotAdapter
 from claw_swebench.claws.openclaw import OpenClawAdapter
+from claw_swebench.claws.opensquilla import OpenSquillaAdapter
 from claw_swebench.claws.zeroclaw import ZeroClawAdapter
 
 CLAWS: dict[str, type[BaseClawAdapter]] = {
     "openclaw": OpenClawAdapter,
+    "opensquilla": OpenSquillaAdapter,
     "hermes": HermesAdapter,
     "nanobot": NanoBotAdapter,
     "zeroclaw": ZeroClawAdapter,

@@ -1,0 +1,27 @@
+# OpenSquilla's Claw-SWE-Bench adapter generates /tmp/opensquilla/config.toml
+# inside each evaluation container. This file is mounted read-only only as a
+# reference/template location; do not put API keys here.
+
+[llm]
+provider = "openrouter"
+api_key_env = "OPENROUTER_API_KEY"
+base_url = "https://openrouter.ai/api/v1"
+
+[tools]
+deny = [
+  "group:web",
+  "group:memory",
+  "group:sessions",
+  "group:messaging",
+  "cron",
+  "image",
+  "image_generate",
+  "gateway",
+  "agents_list",
+  "subagents",
+]
+
+[llm_ensemble]
+enabled = true
+active_profile = "g12_k2_replace_gemini"
+proposer_tools = false

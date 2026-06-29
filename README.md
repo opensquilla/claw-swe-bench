@@ -20,6 +20,7 @@ Supported claws:
 | Claw | Runtime | How it gets into the container | Model selection |
 |---|---|---|---|
 | `openclaw` | Node.js CLI | bind-mount node + module + `~/.openclaw` | `--model` (per-agent) |
+| `opensquilla` | Python venv ([opensquilla/opensquilla](https://github.com/opensquilla/opensquilla)) | bind-mount standalone Python + venv | `--model` experiment group (`B0`..`B7`, `G1`..`G23`) |
 | `hermes` | Python venv | bind-mount standalone Python + venv | `--model` + `claw_configs/hermes/config.yaml` providers |
 | `nanobot` | Python venv | bind-mount standalone Python + venv | `claw_configs/nanobot/config.json` |
 | `zeroclaw` | single Rust binary | bind-mount binary | `claw_configs/zeroclaw/config.toml` |
@@ -51,8 +52,10 @@ Key fairness/contamination properties, enforced for every claw:
   bans its web tools; everything else is identical).
 - **No network answers.** The prompt forbids network use; OpenClaw
   additionally gets a 13-tool deny list (web/memory/session/cron tools);
-  NanoBot's web tools are disabled in config; ZeroClaw's traffic goes
-  through a tool-filtering proxy.
+  OpenSquilla denies web/memory/session/messaging/cron/media/gateway/subagent
+  tools and disables proposer tools for `llm_ensemble`; NanoBot's web tools
+  are disabled in config; ZeroClaw's traffic goes through a tool-filtering
+  proxy.
 - **Future-commit stripping.** The official Multilingual images retain the
   fix commit in git history (`git log --all` leaks the gold patch). Every
   workspace strips future tags/commits, expires reflogs, and GCs before the
@@ -84,6 +87,7 @@ eval containers. Defaults (all overridable via env vars, see
 |---|---|---|
 | `CLAW_PYTHON_HOME` | standalone Python 3.12 home (e.g. the `uv python install 3.12` location) | hermes, nanobot, generic |
 | `OPENCLAW_NODE_BIN` / `OPENCLAW_MODULE_DIR` / `OPENCLAW_STATE_DIR` | `/usr/bin/node` / `/usr/lib/node_modules/openclaw` / `~/.openclaw` | openclaw |
+| `OPENSQUILLA_ENV_PATH` / `OPENSQUILLA_SITE_PACKAGES` | `/opt/opensquilla-env` / `<env>/lib/python3.12/site-packages` | opensquilla |
 | `HERMES_ENV_PATH` | `/opt/hermes-env` | hermes |
 | `NANOBOT_ENV_PATH` | `/opt/nanobot-env` | nanobot |
 | `ZEROCLAW_BIN` | `/usr/local/bin/zeroclaw` | zeroclaw |
@@ -105,7 +109,11 @@ cp claw_configs/zeroclaw/config.toml.example claw_configs/zeroclaw/config.toml
 cp claw_configs/generic/mykey.py.example     claw_configs/generic/mykey.py
 ```
 
-`hermes` and `generic` also read API keys from the host environment
+`opensquilla` generates a container-local config for each instance. It uses
+OpenRouter by default, so set `OPENROUTER_API_KEY` in the host environment
+before running.
+
+`opensquilla`, `hermes`, and `generic` also read API keys from the host environment
 (`OPENROUTER_API_KEY`, `ANTHROPIC_API_KEY`, `DEEPSEEK_API_KEY`,
 `DASHSCOPE_API_KEY`, …) — these are forwarded into the container
 automatically. OpenClaw uses its own credential store (`~/.openclaw`).
@@ -127,11 +135,13 @@ python3 run_infer.py \
 evaluations (also the built-in default — spelled out here so runs are
 reproducible even if defaults change).
 
-- `--claw {openclaw,hermes,nanobot,zeroclaw,generic}` — which harness.
+- `--claw {openclaw,opensquilla,hermes,nanobot,zeroclaw,generic}` — which harness.
 - `--dataset {verified,multilingual}` — loads `config/<dataset>.yaml`.
 - `--model`, `--timeout`, `--max_turns` — override per-claw defaults
-  (`CLAW_DEFAULTS` in `config.py`). For nanobot/zeroclaw the model lives in
-  the claw's own config file; `--model` is recorded as metadata.
+  (`CLAW_DEFAULTS` in `config.py`). For OpenSquilla, `--model` is an
+  experiment group selector: `B*` single-model baselines or `G*`
+  `llm_ensemble.active_profile` values. For nanobot/zeroclaw the model lives
+  in the claw's own config file; `--model` is recorded as metadata.
 - `--llm_no N` — generic only: selects the Nth provider in `mykey.py`.
 - `--workers N` — parallel instances (each in its own container).
 - Re-running the same `--run_id` resumes (skips completed instances);
@@ -176,4 +186,8 @@ Use a distinct `--run_id` per claw/run so harness logs don't collide.
 - **Instance lists**: `config/multilingual_300_instances.txt` and
   `config/verified_mini_50.txt` together form the 350-instance full set. The
   80-instance Lite subset is selected by the cost-aware, rank-aware procedure
-  described in the paper.
+  described in the paper. To export the Lite split from Hugging Face into
+  runner-compatible files, use
+  `python3 scripts/export_opensquilla_lite_instances.py`; it writes
+  `config/opensquilla_lite_multilingual.txt` and
+  `config/opensquilla_lite_verified.txt`.

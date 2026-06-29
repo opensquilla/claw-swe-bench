@@ -43,8 +43,8 @@ def main():
     )
     parser.add_argument(
         "--model", default=None,
-        help="Model name (default: per-claw default; for nanobot/zeroclaw the "
-             "model lives in the claw's own config and this is metadata only)",
+        help="Model name or claw-specific selector (default: per-claw default; "
+             "for opensquilla this is the experiment group, e.g. G12)",
     )
     parser.add_argument(
         "--instance_ids", nargs="+", default=None,
