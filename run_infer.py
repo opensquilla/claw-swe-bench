@@ -18,6 +18,7 @@ from claw_swebench.claws import CLAWS, get_adapter
 from claw_swebench.config import CLAW_DEFAULTS, CONFIG_DIR
 from claw_swebench.dataset import load_instances
 from claw_swebench.orchestrator import run_batch
+from claw_swebench.reporting import sanitize_report_name, write_run_report
 
 logging.basicConfig(
     level=logging.INFO,
@@ -40,6 +41,10 @@ def main():
     parser.add_argument(
         "--run_id", required=True,
         help="Unique run identifier (used for artifact directory)",
+    )
+    parser.add_argument(
+        "--report_name", default=None,
+        help="Name for reports/<name>/ (default: --run_id)",
     )
     parser.add_argument(
         "--model", default=None,
@@ -89,6 +94,13 @@ def main():
     defaults = CLAW_DEFAULTS[args.claw]
     model = args.model or defaults["model"]
     timeout = args.timeout or config.get("timeout") or defaults["timeout"]
+    max_turns = args.max_turns if args.max_turns is not None else defaults.get("max_turns")
+    report_name = args.report_name or args.run_id
+    try:
+        sanitize_report_name(report_name)
+    except ValueError as exc:
+        logger.error("Invalid report name %r: %s", report_name, exc)
+        sys.exit(2)
 
     logger.info("Config: claw=%s dataset=%s model=%s timeout=%ds gitignore=%s",
                 args.claw, dataset_name, model, timeout, setup_gitignore)
@@ -126,9 +138,22 @@ def main():
         max_workers=args.workers,
     )
 
+    report_dir = write_run_report(
+        records=records,
+        run_id=args.run_id,
+        report_name=report_name,
+        claw_name=args.claw,
+        dataset_name=dataset_name,
+        split=split,
+        model_name=model,
+        timeout=timeout,
+        max_turns=max_turns,
+    )
+
     # Final report
     logger.info("=" * 60)
     logger.info("Run complete: %s", args.run_id)
+    logger.info("Report: %s", report_dir)
     for r in records:
         status = "EMPTY" if r.patch_empty else r.state.value
         logger.info("  %s → %s (%.1fs)", r.instance_id, status, r.duration_seconds or 0)

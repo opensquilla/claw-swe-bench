@@ -26,12 +26,14 @@ from claw_swebench.config import (
     CLAW_PYTHON_HOME,
     OPENSQUILLA_ENV_PATH,
     OPENSQUILLA_SITE_PACKAGES,
+    PROMPTS_DIR,
 )
 from claw_swebench.types import AgentResult
 
 logger = logging.getLogger(__name__)
 
 SUBPROCESS_TIMEOUT_BUFFER = 120
+DEFAULT_MAX_TURNS = 100
 
 CONTAINER_HOME = "/tmp/opensquilla"
 HOME_DIR = "/tmp/opensquilla-home"
@@ -140,7 +142,7 @@ class OpenSquillaAdapter(BaseClawAdapter):
         super().__init__(model, timeout, max_turns)
         self.group_spec = resolve_group(model)
         self.group = self.group_spec.group
-        self.max_turns = max_turns if max_turns is not None else 12
+        self.max_turns = max_turns if max_turns is not None else DEFAULT_MAX_TURNS
 
     # ------------------------------------------------------------------
     # Container integration
@@ -152,6 +154,9 @@ class OpenSquillaAdapter(BaseClawAdapter):
             "-v", f"{OPENSQUILLA_ENV_PATH}:{OPENSQUILLA_ENV_PATH}:ro",
             "-v", f"{CONFIG_TEMPLATE_DIR}:/opt/opensquilla-config:ro",
         ]
+
+    def prompt_template(self) -> Path | None:
+        return PROMPTS_DIR / "opensquilla.txt"
 
     def post_container_start(self, workspace) -> None:
         config = self._render_config()
@@ -261,6 +266,10 @@ class OpenSquillaAdapter(BaseClawAdapter):
         if copied_artifacts.exists():
             shutil.rmtree(copied_artifacts)
         workspace.copy_from_container(ARTIFACTS_DIR, str(copied_artifacts))
+        copied_logs = artifact_dir / "opensquilla_logs"
+        if copied_logs.exists():
+            shutil.rmtree(copied_logs)
+        workspace.copy_from_container(LOG_DIR, str(copied_logs))
 
         usage = {}
         usage_path = copied_artifacts / "usage.json"
@@ -308,6 +317,10 @@ class OpenSquillaAdapter(BaseClawAdapter):
             f"OPENSQUILLA_STATE_DIR={CONTAINER_HOME}",
             "-e",
             f"OPENSQUILLA_LOG_DIR={LOG_DIR}",
+            "-e",
+            "OPENSQUILLA_TURN_CALL_LOG=1",
+            "-e",
+            f"OPENSQUILLA_TURN_CALL_LOG_DIR={LOG_DIR}",
             "-e",
             f"XDG_CACHE_HOME={CACHE_DIR}",
             "-e",

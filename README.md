@@ -140,8 +140,12 @@ reproducible even if defaults change).
 - `--model`, `--timeout`, `--max_turns` — override per-claw defaults
   (`CLAW_DEFAULTS` in `config.py`). For OpenSquilla, `--model` is an
   experiment group selector: `B*` single-model baselines or `G*`
-  `llm_ensemble.active_profile` values. For nanobot/zeroclaw the model lives
-  in the claw's own config file; `--model` is recorded as metadata.
+  `llm_ensemble.active_profile` values. OpenSquilla defaults to 100 iterations
+  per instance because ensemble runs often spend several turns reading before
+  editing. For nanobot/zeroclaw the model lives in the claw's own config file;
+  `--model` is recorded as metadata.
+- `--report_name NAME` — optional directory name for `reports/<NAME>/`.
+  Defaults to `--run_id`.
 - `--llm_no N` — generic only: selects the Nth provider in `mykey.py`.
 - `--workers N` — parallel instances (each in its own container).
 - Re-running the same `--run_id` resumes (skips completed instances);
@@ -150,7 +154,11 @@ reproducible even if defaults change).
 Artifacts land in `artifacts/<run_id>/`: per-instance `prompt.txt`,
 `agent_stdout.log` / `agent_stderr.log`, session logs, `git.patch`,
 `metadata.json` (incl. token usage where available), plus shared
-`predictions.jsonl` and `state.jsonl`.
+`predictions.jsonl` and `state.jsonl`. Each inference command also writes a
+named report under `reports/<report_name>/` with `summary.json`, `summary.md`,
+`predictions.jsonl`, and copied per-instance agent outputs for quick debugging.
+For OpenSquilla this includes `opensquilla_logs/`, with trace, decision, and
+raw turn-call JSONL files.
 
 Evaluation (official harness):
 

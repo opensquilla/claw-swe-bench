@@ -34,6 +34,7 @@ CONTAINER_MEMORY = os.environ.get("CLAW_CONTAINER_MEMORY", "8g")
 # ---------------------------------------------------------------------------
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 ARTIFACTS_ROOT = PROJECT_ROOT / "artifacts"
+REPORTS_ROOT = PROJECT_ROOT / "reports"
 CONFIG_DIR = PROJECT_ROOT / "config"
 PROMPTS_DIR = PROJECT_ROOT / "prompts"
 CLAW_CONFIGS_DIR = PROJECT_ROOT / "claw_configs"
@@ -53,7 +54,7 @@ SWEBENCH_WORK_DIR = Path(os.environ.get("SWEBENCH_WORK_DIR", "/data"))
 # ---------------------------------------------------------------------------
 CLAW_DEFAULTS = {
     "openclaw": {"model": "openrouter/anthropic/claude-opus-4.6", "timeout": 3600, "max_turns": 300},
-    "opensquilla": {"model": "G12",          "timeout": 3600, "max_turns": 12},
+    "opensquilla": {"model": "G12",          "timeout": 3600, "max_turns": 100},
     "hermes":   {"model": "glm-5.1",        "timeout": 3600, "max_turns": 300},
     "nanobot":  {"model": "qwen3.6-flash",  "timeout": 3600, "max_turns": 300},
     "zeroclaw": {"model": "qwen3.6-flash",  "timeout": 3600, "max_turns": 300},

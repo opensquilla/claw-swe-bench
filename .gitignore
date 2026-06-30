@@ -1,10 +1,12 @@
 __pycache__/
 *.pyc
 *.egg-info/
+.env*.local
 
 # Run outputs
 artifacts/
 logs/
+reports/
 
 # GenericAgent per-instance runtime dirs
 ga_temp/
