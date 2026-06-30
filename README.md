@@ -171,6 +171,17 @@ python3 run_eval.py \
 
 Use a distinct `--run_id` per claw/run so harness logs don't collide.
 
+For the OpenSquilla Lite-80 sweep used in local experiments:
+
+```bash
+python3 scripts/run_opensquilla_lite80.py --parallel-groups 2
+```
+
+By default this runs `B0 B1 G8 G12 G16 G19` on both Lite splits. The batch
+summary, command logs, and SWE-bench evaluation work directory go under
+`reports/opensquilla-lite80-<timestamp>/`; each inference run also writes its
+own `reports/osq-<group>-lite-*/` directory.
+
 ## Adding a new claw
 
 1. Create `claw_swebench/claws/<name>.py` implementing `BaseClawAdapter`:

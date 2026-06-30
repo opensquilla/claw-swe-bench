@@ -140,7 +140,7 @@ def run_one_instance(
         started_at=datetime.now(timezone.utc).isoformat(),
     )
 
-    workspace = SWEBenchWorkspace(instance_id, adapter)
+    workspace = SWEBenchWorkspace(instance_id, adapter, run_id=run_id)
     agent_id = f"swe-{instance_id}".replace(".", "-")
     agent_result = None
     extra_usage: dict = {}

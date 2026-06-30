@@ -43,11 +43,15 @@ class ExecResult:
 class SWEBenchWorkspace:
     """Manages a single SWE-bench Docker container for one instance."""
 
-    def __init__(self, instance_id: str, adapter):
+    def __init__(self, instance_id: str, adapter, run_id: str | None = None):
         self.instance_id = instance_id
         self.adapter = adapter
         self.image_name = self._resolve_image(instance_id)
-        self.container_name = instance_id_to_container(adapter.name, instance_id)
+        self.container_name = instance_id_to_container(
+            adapter.name,
+            instance_id,
+            run_id=run_id,
+        )
         self._started = False
 
     @staticmethod
@@ -64,8 +68,9 @@ class SWEBenchWorkspace:
             )
             if result.returncode == 0:
                 return candidate
-        # Default to harness format even if not found (will fail at start)
-        return instance_id_to_image(instance_id)
+        # Prefer SWE-agent's Docker Hub namespace when neither image is local;
+        # docker run can then pull it automatically if it exists remotely.
+        return instance_id_to_image_sweagent(instance_id)
 
     def start(self) -> str:
         """Start the Docker container. Returns the container name."""

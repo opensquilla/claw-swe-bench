@@ -7,6 +7,7 @@ Host-machine paths (claw runtimes, SWE-bench venv) can be overridden via
 environment variables so the framework is portable across machines.
 """
 
+import hashlib
 import os
 from pathlib import Path
 
@@ -188,12 +189,35 @@ def instance_id_to_image_sweagent(instance_id: str) -> str:
     return f"swebench/{DOCKER_IMAGE_PREFIX}.{transformed}:{DOCKER_IMAGE_TAG}"
 
 
-def instance_id_to_container(claw_name: str, instance_id: str) -> str:
+def _docker_name_component(value: str, max_length: int = 80) -> str:
+    """Return a Docker container-name component with stable truncation."""
+    cleaned = []
+    for char in str(value or ""):
+        if char.isalnum() or char in "._-":
+            cleaned.append(char)
+        else:
+            cleaned.append("_")
+    component = "".join(cleaned).strip("._-") or "run"
+    if len(component) <= max_length:
+        return component
+    digest = hashlib.sha1(component.encode("utf-8")).hexdigest()[:10]
+    return f"{component[:max_length - 11]}-{digest}"
+
+
+def instance_id_to_container(
+    claw_name: str,
+    instance_id: str,
+    run_id: str | None = None,
+) -> str:
     """Convert instance_id to container name.
 
     (openclaw, django__django-16429) -> openclaw-swe-django__django-16429
     """
-    return f"{claw_name}-swe-{instance_id}"
+    parts = [_docker_name_component(claw_name, 40), "swe"]
+    if run_id:
+        parts.append(_docker_name_component(run_id, 80))
+    parts.append(_docker_name_component(instance_id, 120))
+    return "-".join(parts)
 
 
 def get_artifact_dir(run_id: str, instance_id: str) -> Path:
