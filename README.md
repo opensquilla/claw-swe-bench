@@ -1,7 +1,9 @@
 # claw-swe-bench
 
+**Leaderboard:** [claw-swe-bench.github.io](https://claw-swe-bench.github.io/)
+
 A unified adapter framework for evaluating agent harnesses ("claws") on
-[SWE-bench](https://www.swebench.com/). One command runs any supported claw on
+SWE-bench. One command runs any supported claw on
 SWE-bench Verified or SWE-bench Multilingual, with identical prompting, patch
 collection, and evaluation across all of them — so the harness becomes a
 controlled variable and results are comparable harness-to-harness.
@@ -13,7 +15,6 @@ instances across 8 languages (300 from SWE-bench Multilingual + 50 from
 SWE-bench Verified-Mini); the paper also defines an 80-instance **Lite** subset
 for low-cost iteration (see *Instance lists* in Notes).
 
-**Leaderboard:** [claw-swe-bench.github.io](https://claw-swe-bench.github.io/)
 
 Supported claws:
 
