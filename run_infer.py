@@ -16,6 +16,7 @@ import yaml
 
 from claw_swebench.claws import CLAWS, get_adapter
 from claw_swebench.config import CLAW_DEFAULTS, CONFIG_DIR
+from claw_swebench.context_window import effective_context_window
 from claw_swebench.dataset import load_instances
 from claw_swebench.orchestrator import run_batch
 
@@ -92,6 +93,20 @@ def main():
 
     logger.info("Config: claw=%s dataset=%s model=%s timeout=%ds gitignore=%s",
                 args.claw, dataset_name, model, timeout, setup_gitignore)
+
+    # Context window is a model/runtime budget, not a harness capability. Log
+    # what this claw will actually run with so the number lands in the run log
+    # as well as each instance's metadata.json.
+    ctx = effective_context_window(args.claw)
+    if ctx.tokens:
+        logger.info("Context window: %s tokens (%s in %s)",
+                    f"{ctx.tokens:,}", ctx.key, ctx.source)
+    else:
+        logger.warning(
+            "Context window: unset for %s (%s: %s). This run is not directly "
+            "comparable with a claw that pins a budget. "
+            "`python3 -m claw_swebench.context_window` shows the spread.",
+            args.claw, ctx.source or "no config", ctx.note or "no value found")
 
     # Load dataset
     instances = load_instances(

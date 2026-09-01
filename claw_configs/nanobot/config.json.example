@@ -1,5 +1,5 @@
 {
-  "_comment": "NanoBot runtime config. Copy to config.json and fill in your API key. Mounted at /opt/nanobot-config inside the container. Model/provider live here (NanoBot has no --model CLI flag). To report cached_tokens via the host-side cache proxy, set api_base to http://host.docker.internal:18096/v1 and start proxies/dashscope_cache_proxy.py on port 18096.",
+  "_comment": "NanoBot runtime config. Copy to config.json and fill in your API key. Mounted at /opt/nanobot-config inside the container. Model/provider live here (NanoBot has no --model CLI flag). To report cached_tokens via the host-side cache proxy, set api_base to http://host.docker.internal:18096/v1 and start proxies/dashscope_cache_proxy.py on port 18096. contextWindowTokens is NOT set below: NanoBot falls back to its own runtime default, which is not visible to the harness and is not necessarily the same budget the other claws run with (hermes pins 200000 for openrouter, zeroclaw pins 128000). Set agents.defaults.contextWindowTokens here to make the budget explicit, and check it with `python3 -m claw_swebench.context_window`.",
   "providers": {
     "dashscope": {
       "api_key": "YOUR_DASHSCOPE_API_KEY",

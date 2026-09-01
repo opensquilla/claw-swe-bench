@@ -63,6 +63,11 @@ Key fairness/contamination properties, enforced for every claw:
   and binary diffs are stripped (`patch.py`).
 - **Per-instance isolation.** One fresh container per instance (pids/memory
   limited); OpenClaw additionally gets a throwaway agent per instance.
+- **Declared context budget.** Context window is a model/runtime budget, not
+  a harness capability, and it is *not* currently normalized across claws.
+  Each run reads the budget out of the claw's own config and records it in
+  `metadata.json`, so a comparison can be checked rather than assumed. See
+  [Check the context budget](#4-check-the-context-budget).
 
 ## Setup
 
@@ -110,6 +115,38 @@ cp claw_configs/generic/mykey.py.example     claw_configs/generic/mykey.py
 (`OPENROUTER_API_KEY`, `ANTHROPIC_API_KEY`, `DEEPSEEK_API_KEY`,
 `DASHSCOPE_API_KEY`, …) — these are forwarded into the container
 automatically. OpenClaw uses its own credential store (`~/.openclaw`).
+
+### 4. Check the context budget
+
+```bash
+python3 -m claw_swebench.context_window
+```
+
+```
+claw       context window  source
+----------------------------------------------------------------
+hermes            200,000  claw_configs/hermes/config.yaml
+nanobot             unset  claw_configs/nanobot/config.json
+                           note: unset; claw falls back to its runtime default
+zeroclaw          128,000  claw_configs/zeroclaw/config.toml
+```
+
+Each claw keeps the setting in its own file under its own key:
+
+| claw     | file                                | key                                              |
+|----------|-------------------------------------|--------------------------------------------------|
+| hermes   | `claw_configs/hermes/config.yaml`   | `custom_providers[<model.provider>].context_length` |
+| zeroclaw | `claw_configs/zeroclaw/config.toml` | `agent.max_context_tokens`                       |
+| nanobot  | `claw_configs/nanobot/config.json`  | `agents.defaults.contextWindowTokens`            |
+| openclaw | `$OPENCLAW_STATE_DIR/openclaw.json` | `agents.defaults.contextWindowTokens`            |
+| generic  | `claw_configs/generic/mykey.py`     | not exposed (`max_tokens` is output, not context) |
+
+`unset` means the claw uses its own runtime default, which the harness cannot
+see. Two claws on different budgets are not measuring only the harness, so
+pin the same number in each config before comparing them. `run_infer.py` logs
+the budget at startup and warns when it is unset, and every instance's
+`metadata.json` carries a `claw_config.context_window` block recording what
+was actually read.
 
 ## Run
 
