@@ -22,10 +22,26 @@ from claw_swebench.config import get_artifact_dir, get_predictions_path, get_sta
 from claw_swebench.patch import clean_patch, collect_patch, is_empty_patch
 from claw_swebench.prediction import append_prediction, format_prediction
 from claw_swebench.prompt import build_prompt
+from claw_swebench.context_window import effective_context_window
 from claw_swebench.types import AgentResult, InstanceRecord, InstanceState
 from claw_swebench.workspace import SWEBenchWorkspace
 
 logger = logging.getLogger(__name__)
+
+
+def describe_claw_config(adapter) -> dict:
+    """The claw settings this run used, for the per-instance record.
+
+    Context window is read from the claw's live config rather than asserted
+    here, so the record reflects what the claw actually ran with.
+    """
+    return {
+        "claw": adapter.name,
+        "model": adapter.model,
+        "timeout": adapter.timeout,
+        "max_turns": adapter.max_turns,
+        "context_window": effective_context_window(adapter.name).as_dict(),
+    }
 
 
 def _save_metadata(
@@ -33,6 +49,7 @@ def _save_metadata(
     record: InstanceRecord,
     agent_result: AgentResult | None,
     extra_usage: dict | None = None,
+    claw_config: dict | None = None,
 ) -> None:
     """Save instance metadata to artifact_dir/metadata.json."""
     data = {
@@ -57,6 +74,8 @@ def _save_metadata(
         }
     if extra_usage:
         data["usage"] = extra_usage
+    if claw_config:
+        data["claw_config"] = claw_config
     (artifact_dir / "metadata.json").write_text(json.dumps(data, indent=2, ensure_ascii=False))
 
 
@@ -221,7 +240,8 @@ def run_one_instance(
             record.duration_seconds = round((end - start).total_seconds(), 1)
 
         # Save metadata (per-instance dir, no lock needed) and shared state files
-        _save_metadata(artifact_dir, record, agent_result, extra_usage)
+        _save_metadata(artifact_dir, record, agent_result, extra_usage,
+                       claw_config=describe_claw_config(adapter))
         if file_lock:
             with file_lock:
                 _append_state(state_path, record)
